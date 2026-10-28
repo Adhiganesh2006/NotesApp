@@ -12,25 +12,20 @@ pipeline {
         stage('Verify Python') {
             steps {
                 bat 'python --version'
-                bat 'python -m pip --version'
             }
         }
 
         stage('Create Virtual Environment') {
             steps {
-                bat '''
-                    if exist .venv rmdir /s /q .venv
-                    python -m venv .venv
-                '''
+                bat 'if exist .venv rmdir /s /q .venv'
+                bat 'python -m venv .venv'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                bat '''
-                    .venv\\Scripts\\python.exe -m pip install --upgrade pip
-                    .venv\\Scripts\\python.exe -m pip install --no-cache-dir -r requirements.txt
-                '''
+                bat '.venv\\Scripts\\python.exe -m pip install --upgrade pip'
+                bat '.venv\\Scripts\\python.exe -m pip install --no-cache-dir -r requirements.txt'
             }
         }
 
@@ -49,15 +44,15 @@ pipeline {
 
     post {
         success {
-            echo 'SUCCESS: Notes App tests passed.'
+            echo 'SUCCESS: NotesApp tests passed.'
         }
 
         failure {
-            echo 'FAILURE: Check the Jenkins Console Output.'
+            echo 'FAILURE: Check Console Output.'
         }
 
         always {
-            echo 'Notes App CI pipeline completed.'
+            echo 'NotesApp pipeline completed.'
         }
     }
 }
