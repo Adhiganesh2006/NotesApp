@@ -9,7 +9,8 @@ HTML = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Notes App - V1</title>
+    <title>Notes App - V2</title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -24,6 +25,11 @@ HTML = """
             text-align: center;
         }
 
+        .version {
+            text-align: center;
+            color: #555;
+        }
+
         form, .note {
             background: white;
             padding: 20px;
@@ -35,6 +41,8 @@ HTML = """
             width: 95%;
             padding: 10px;
             margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
 
         button {
@@ -42,20 +50,40 @@ HTML = """
             color: white;
             padding: 10px 18px;
             border: none;
+            border-radius: 5px;
             cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .edit-btn {
+            background: #16a34a;
+        }
+
+        .edit-btn:hover {
+            background: #15803d;
         }
 
         .note h3 {
             margin-bottom: 5px;
         }
+
+        .note {
+            border-left: 5px solid #2563eb;
+        }
     </style>
 </head>
 
 <body>
+
     <h1>Notes App</h1>
-    <p style="text-align:center">Version {{ version }}</p>
+
+    <p class="version">Version 2 - Add and Edit Notes</p>
 
     <form method="POST" action="/add">
+
         <h2>Add a Note</h2>
 
         <input
@@ -72,19 +100,54 @@ HTML = """
         ></textarea>
 
         <button type="submit">Add Note</button>
+
     </form>
 
     <h2>Saved Notes</h2>
 
     {% for note in notes %}
+
         <div class="note">
+
             <h3>{{ note.title }}</h3>
+
             <p>{{ note.content }}</p>
+
             <small>Note ID: {{ note.id }}</small>
+
+            <h4>Edit Note</h4>
+
+            <form method="POST" action="/edit/{{ note.id }}">
+
+                <input
+                    type="text"
+                    name="title"
+                    value="{{ note.title }}"
+                    required
+                >
+
+                <textarea
+                    name="content"
+                    required
+                >{{ note.content }}</textarea>
+
+                <button
+                    type="submit"
+                    class="edit-btn"
+                >
+                    Save Changes
+                </button>
+
+            </form>
+
         </div>
+
     {% else %}
+
         <p>No notes available.</p>
+
     {% endfor %}
+
 </body>
 </html>
 """
@@ -95,7 +158,7 @@ def home():
     return render_template_string(
         HTML,
         notes=notes,
-        version=app.config.get("APP_VERSION", "V1")
+        version="V2"
     )
 
 
@@ -107,14 +170,37 @@ def add_note():
     content = request.form.get("content", "").strip()
 
     if title and content:
+
         notes.append({
             "id": next_id,
             "title": title,
             "content": content
         })
+
         next_id += 1
 
     return redirect("/")
+
+
+@app.route("/edit/<int:note_id>", methods=["POST"])
+def edit_note(note_id):
+
+    title = request.form.get("title", "").strip()
+    content = request.form.get("content", "").strip()
+
+    if not title or not content:
+        return "Title and content are required.", 400
+
+    for note in notes:
+
+        if note["id"] == note_id:
+
+            note["title"] = title
+            note["content"] = content
+
+            return redirect("/")
+
+    return "Note not found.", 404
 
 
 @app.route("/health")
