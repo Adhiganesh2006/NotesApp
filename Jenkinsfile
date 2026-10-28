@@ -1,3 +1,4 @@
+```groovy
 pipeline {
     agent any
 
@@ -11,18 +12,37 @@ pipeline {
         stage('Verify Python') {
             steps {
                 bat 'python --version'
+                bat 'python -m pip --version'
+            }
+        }
+
+        stage('Create Virtual Environment') {
+            steps {
+                bat '''
+                    if exist .venv rmdir /s /q .venv
+                    python -m venv .venv
+                '''
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                bat 'python -m pip install -r requirements.txt'
+                bat '''
+                    .venv\\Scripts\\python.exe -m pip install --upgrade pip
+                    .venv\\Scripts\\python.exe -m pip install --no-cache-dir -r requirements.txt
+                '''
+            }
+        }
+
+        stage('Verify Pytest') {
+            steps {
+                bat '.venv\\Scripts\\python.exe -m pytest --version'
             }
         }
 
         stage('Run Tests') {
             steps {
-                bat 'python -m pytest -v'
+                bat '.venv\\Scripts\\python.exe -m pytest -v'
             }
         }
     }
@@ -33,7 +53,7 @@ pipeline {
         }
 
         failure {
-            echo 'FAILURE: Check the Jenkins console output.'
+            echo 'FAILURE: Check the Jenkins Console Output.'
         }
 
         always {
@@ -41,3 +61,4 @@ pipeline {
         }
     }
 }
+```
