@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notesapp-v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notesapp-v2
+  template:
+    metadata:
+      labels:
+        app: notesapp-v2
+    spec:
+      containers:
+        - name: notesapp
+          image: adhiganesh123/notesapp:v2
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 5

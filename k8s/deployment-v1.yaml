@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: notesapp
-          image: YOUR_DOCKERHUB_USERNAME/notesapp:v1
+          image: adhiganesh123/notesapp:v1
           imagePullPolicy: Always
           ports:
             - containerPort: 5000
